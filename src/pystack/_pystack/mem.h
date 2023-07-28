@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <fcntl.h>
+#include <functional>
 #include <list>
 #include <memory>
 #include <optional>
@@ -214,8 +215,6 @@ class CorefileRemoteMemoryManager : public AbstractRemoteMemoryManager
             std::shared_ptr<CoreFileAnalyzer> analyzer,
             std::vector<VirtualMap>& vmaps);
 
-    ~CorefileRemoteMemoryManager() override;
-
     // Methods
     ssize_t copyMemoryFromProcess(remote_addr_t addr, size_t size, void* destination) const override;
 
@@ -232,8 +231,8 @@ class CorefileRemoteMemoryManager : public AbstractRemoteMemoryManager
     std::shared_ptr<CoreFileAnalyzer> d_analyzer;
     std::vector<VirtualMap> d_vmaps;
     std::vector<SimpleVirtualMap> d_shared_libs;
-    char* corefile_data;
-    size_t corefile_size;
+    size_t d_corefile_size;
+    std::unique_ptr<char, std::function<void(char*)>> d_corefile_data;
 
     StatusCode readCorefile(int fd, const char* filename);
     StatusCode getMemoryLocationFromCore(remote_addr_t addr, off_t* offset_in_file) const;
