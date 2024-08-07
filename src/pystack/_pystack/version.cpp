@@ -408,11 +408,26 @@ python_v python_v3_13 = {
         py_cframe<Python3_12::CFrame>(),
 };
 
+python_v python_v3_13t = {
+        py_type<Python3_13t::PyTypeObject>(),
+        py_codev311<Python3_13t::PyCodeObject>(),
+        py_framev312<Python3_12::PyFrameObject>(),
+        py_threadv313<Python3_13::PyThreadState>(),
+        py_isv312<Python3_13t::PyInterpreterState>(),
+        py_runtimev313<Python3_13::PyRuntimeState>(),
+        py_gc<Python3_13t::_gc_runtime_state>(),
+        py_cframe<Python3_12::CFrame>(),
+};
+
 // -----------------------------------------------------------------------------
 
-const python_v*
-getCPythonOffsets(int major, int minor)
+python_v*
+getCPythonOffsets(int major, int minor, bool free_threaded)
 {
+    if (major == 2 || (major == 3 && minor < 13)) {
+        throw std::runtime_error("only Python 3.13+ can be free-threaded");
+    }
+
     switch (major) {
         // ---- Python 2 -------------------------------------------------------
         case 2:
@@ -476,7 +491,7 @@ getCPythonOffsets(int major, int minor)
                     warnAboutUnsuportedVersion(major, minor);
                     // fallthrough to latest
                 case 13:
-                    return &python_v3_13;
+                    return free_threaded ? &python_v3_13t : &python_v3_13;
                     break;
             }
             break;

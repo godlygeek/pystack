@@ -528,7 +528,7 @@ Object::Object(const std::shared_ptr<const AbstractProcessManager>& manager, rem
 {
     LOG(DEBUG) << std::hex << std::showbase << "Copying PyObject data from address " << addr;
 
-    PyObject obj;
+    Python3_13t::PyObject obj;
     try {
         manager->copyObjectFromProcess(d_addr, &obj);
     } catch (RemoteMemCopyError& ex) {

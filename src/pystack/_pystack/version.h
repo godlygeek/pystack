@@ -188,7 +188,7 @@ define_python_v_get_specialization(py_cframe);
 
 #undef define_python_v_get_specialization
 
-const python_v*
-getCPythonOffsets(int major, int minor);
+python_v*
+getCPythonOffsets(int major, int minor, bool free_threaded);
 
 }  // namespace pystack

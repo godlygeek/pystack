@@ -594,7 +594,7 @@ AbstractProcessManager::findPythonVersion() const
 void
 AbstractProcessManager::setPythonVersion(const std::pair<int, int>& version)
 {
-    d_py_v = getCPythonOffsets(version.first, version.second);
+    d_py_v = getCPythonOffsets(version.first, version.second, true);
     // Note: getCPythonOffsets can throw. Don't set these if it does.
     d_major = version.first;
     d_minor = version.second;
@@ -603,7 +603,7 @@ AbstractProcessManager::setPythonVersion(const std::pair<int, int>& version)
 }
 
 void
-AbstractProcessManager::warnIfOffsetsAreMismatched() const
+AbstractProcessManager::warnIfOffsetsAreMismatched()
 {
     if (!versionIsAtLeast(3, 13)) {
         return;  // Nothing to cross-reference; _Py_DebugOffsets was added in 3.13
@@ -630,6 +630,7 @@ AbstractProcessManager::warnIfOffsetsAreMismatched() const
         LOG(WARNING) << "Debug offsets mismatch: " #pystack_struct ".size "                             \
                      << offsets().pystack_struct.size << " > " << getField(py_runtime, size_offset)     \
                      << " reported by CPython";                                                         \
+        d_py_v->pystack_struct.size = getField(py_runtime, size_offset);                                \
     } else                                                                                              \
         do {                                                                                            \
         } while (0)
@@ -641,6 +642,7 @@ AbstractProcessManager::warnIfOffsetsAreMismatched() const
         LOG(WARNING) << "Debug offsets mismatch: " #pystack_field << " "                                \
                      << offsets().pystack_field.offset                                                  \
                      << " != " << getField(py_runtime, field_offset_offset) << " reported by CPython";  \
+        d_py_v->pystack_field.offset = getField(py_runtime, field_offset_offset);                       \
     } else                                                                                              \
         do {                                                                                            \
         } while (0)

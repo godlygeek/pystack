@@ -120,7 +120,7 @@ class AbstractProcessManager : public std::enable_shared_from_this<AbstractProce
     std::shared_ptr<Analyzer> d_analyzer;
     int d_major{};
     int d_minor{};
-    const python_v* d_py_v{};
+    python_v* d_py_v{};
     mutable std::unordered_map<std::string, remote_addr_t> d_type_cache;
 
     // Methods
@@ -128,7 +128,7 @@ class AbstractProcessManager : public std::enable_shared_from_this<AbstractProce
     bool isValidDictionaryObject(remote_addr_t addr) const;
 
   private:
-    void warnIfOffsetsAreMismatched() const;
+    void warnIfOffsetsAreMismatched();
     remote_addr_t scanMemoryAreaForInterpreterState(const VirtualMap& map) const;
 };
 

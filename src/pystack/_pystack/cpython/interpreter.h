@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lock.h"
 #include "gc.h"
 #include "object.h"
 
@@ -250,10 +251,6 @@ typedef struct _is
 namespace Python3_13 {
 
 struct _pythreadstate; /* Forward */
-struct PyMutex
-{
-    uint8_t v;
-};
 typedef int (*_Py_pending_call_func)(void*);
 struct _pending_call
 {
@@ -337,7 +334,46 @@ typedef struct _is
     PyObject* builtins;
     struct _import_state imports;
 } PyInterpreterState;
+
 }  // namespace Python3_13
+
+namespace Python3_13t {
+
+using Python3_13::_pythreadstate;
+using Python3_13::_ceval_state;
+using Python3_13::_import_state;
+
+typedef struct _is
+{
+    struct _ceval_state ceval;
+    struct _is* next;
+    int64_t id;
+    int64_t id_refcount;
+    int requires_idref;
+    PyThread_type_lock id_mutex;
+    long _whence;
+    int _initialized;
+    int _ready;
+    int finalizing;
+    uintptr_t last_restart_version;
+    struct pythreads
+    {
+        uint64_t next_unique_id;
+        _pythreadstate* head;
+        _pythreadstate* main;
+        Py_ssize_t count;
+        size_t stacksize;
+    } threads;
+    struct pyruntimestate* runtime;
+    void* _finalizing;
+    unsigned long _finalizing_id;
+    struct Python3_13t::_gc_runtime_state gc;
+    PyObject* sysdict;
+    PyObject* builtins;
+    struct _import_state imports;
+} PyInterpreterState;
+
+}  // namespace Python3_13t
 
 typedef union {
     Python2::PyInterpreterState v2;
@@ -348,5 +384,6 @@ typedef union {
     Python3_11::PyInterpreterState v3_11;
     Python3_12::PyInterpreterState v3_12;
     Python3_13::PyInterpreterState v3_13;
+    Python3_13t::PyInterpreterState v3_13t;
 } PyInterpreterState;
 }  // namespace pystack

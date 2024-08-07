@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <sys/types.h>
 
+#include "lock.h"
+
 static_assert(sizeof(void*) == sizeof(intptr_t));
 #if INTPTR_MAX == INT64_MAX
 #    define ENVIRONMENT64
@@ -205,10 +207,84 @@ typedef struct _typeobject
 } PyTypeObject;
 }  // namespace Python3_8
 
+namespace Python3_13t {
+
+struct _typeobject;
+
+typedef struct object
+{
+    uintptr_t ob_tid;
+    uint16_t _padding;
+    Python3_13::PyMutex ob_mutex;
+    uint8_t ob_gc_bits;
+    uint32_t ob_ref_local;
+    Py_ssize_t ob_ref_shared;
+    _typeobject* ob_type;
+} PyObject;
+
+typedef struct
+{
+    PyObject ob_base;
+    Py_ssize_t ob_size; /* Number of items in variable part */
+} PyVarObject;
+
+typedef struct _typeobject
+{
+    PyVarObject ob_base;
+    const char* tp_name;
+    Py_ssize_t tp_basicsize, tp_itemsize;
+    destructor tp_dealloc;
+    Py_ssize_t tp_vectorcall_offset;
+    getattrfunc tp_getattr;
+    setattrfunc tp_setattr;
+    void* tp_as_async;
+    reprfunc tp_repr;
+    void* tp_as_number;
+    void* tp_as_sequence;
+    void* tp_as_mapping;
+    hashfunc tp_hash;
+    ternaryfunc tp_call;
+    reprfunc tp_str;
+    getattrofunc tp_getattro;
+    setattrofunc tp_setattro;
+    void* tp_as_buffer;
+    unsigned long tp_flags;
+    const char* tp_doc; /* Documentation string */
+    traverseproc tp_traverse;
+    inquiry tp_clear;
+    richcmpfunc tp_richcompare;
+    Py_ssize_t tp_weaklistoffset;
+    getiterfunc tp_iter;
+    iternextfunc tp_iternext;
+    struct PyMethodDef* tp_methods;
+    struct PyMemberDef* tp_members;
+    struct PyGetSetDef* tp_getset;
+    struct _typeobject* tp_base;
+    PyObject* tp_dict;
+    descrgetfunc tp_descr_get;
+    descrsetfunc tp_descr_set;
+    Py_ssize_t tp_dictoffset;
+    initproc tp_init;
+    allocfunc tp_alloc;
+    newfunc tp_new;
+    freefunc tp_free;
+    inquiry tp_is_gc;
+    PyObject* tp_bases;
+    PyObject* tp_mro;
+    PyObject* tp_cache;
+    PyObject* tp_subclasses;
+    PyObject* tp_weaklist;
+    destructor tp_del;
+    unsigned int tp_version_tag;
+} PyTypeObject;
+
+}  // namespace Python3_13t
+
 typedef union {
     Python2::PyTypeObject v2;
     Python3_3::PyTypeObject v3_3;
     Python3_8::PyTypeObject v3_8;
+    Python3_13t::PyTypeObject v3_13t;
 } PyTypeObject;
 
 /* These flags are used to determine if a type is a subclass. */
